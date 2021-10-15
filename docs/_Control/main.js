@@ -80,6 +80,11 @@ options = {
   let enemies;
 
   /**
+   * @type { number }
+   */
+  let currentEnemySpeed;
+
+  /**
  * @typedef {{
  * pos: Vector,
  * firingCooldown: number,
@@ -121,7 +126,19 @@ function update() {
       movingHorizontal: false,
       movingVertical: false
 		};
+    enemies = [];
+    currentEnemySpeed = 0;
 
+  }
+  if(enemies.length == 0){
+    currentEnemySpeed = 
+      rnd(G.ENEMY_MIN_BASE_SPEED, G.ENEMY_MAX_BASE_SPEED);
+    for (let i = 0; i < 5; i++){
+      const posX = rnd(0, G.WIDTH);
+      const posY = -rnd(i * G.HEIGHT * 0.1);
+      enemies.push({pos: vec(posX, posY)})
+      
+    }
 
   }
 
@@ -181,6 +198,12 @@ function update() {
 		PI/2, // The emitting angle
 		PI/4  // The emitting width
 	);
+  remove(enemies, (e) => {
+    e.pos.y += currentEnemySpeed;
+    color("black");
+    char("b", e.pos);
+    return (e.pos.y > G.HEIGHT);
+  });
   
 
 }
