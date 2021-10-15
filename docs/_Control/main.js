@@ -323,11 +323,11 @@ function update() {
   remove(mBullets, (m) => {
     m.pos.x = player.pos.x;
     if (m.travelDistance >= G.MBULLET_DISTANCE/2) {
-      m.pos.y -= G.MBULLET_SPEED;
-      m.travelDistance -= G.MBULLET_SPEED;
+      m.pos.y = player.pos.y - (G.MBULLET_DISTANCE - m.travelDistance);
+      m.travelDistance--;
     } else {
-      m.pos.y += G.MBULLET_SPEED * 1.5;
-      m.travelDistance -= G.MBULLET_SPEED * 1.5;
+      m.pos.y = player.pos.y - m.travelDistance;
+      m.travelDistance--;
     }
     color("purple");
     const isCollidingWithEnemies = char("d", m.pos).isColliding.char.b;
