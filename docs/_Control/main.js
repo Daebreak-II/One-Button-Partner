@@ -36,7 +36,7 @@ const G = {
   PLAYER_FIRE_RATE: 10,
   PLAYER_GUN_OFFSET: 3,
   PLAYER_MAG_SIZE: 10,
-  PLAYER_MOVE_SPEED: 1,
+  PLAYER_MOVE_SPEED: 0.1,
   
   FBULLET_SPEED: 5,
   
@@ -56,49 +56,49 @@ options = {
 
 /**
 * @typedef {{
-  * pos: Vector,
-  * speed: number
-  * }} Star
-  */
+* pos: Vector,
+* speed: number
+* }} Star
+*/
   
-  /**
-  * @type  { Star [] }
-  */
-  let stars;
+/**
+* @type  { Star [] }
+*/
+let stars;
 
-  /**
- * @typedef {{
- * pos: Vector,
-   * firingCooldown: number,
-   * drift: number
-   * }} Enemy
-   */
+/**
+* @typedef {{
+* pos: Vector,
+* firingCooldown: number,
+* drift: number
+* }} Enemy
+*/
   
-  /**
-   * @type { Enemy [] }
-   */
-  let enemies;
+/**
+* @type { Enemy [] }
+*/
+let enemies;
 
-  /**
-   * @type { number }
-   */
-  let currentEnemySpeed;
+/**
+* @type { number }
+*/
+let currentEnemySpeed;
 
-  /**
- * @typedef {{
- * pos: Vector,
- * firingCooldown: number,
- * currentBullets: number,
- * beamFired: boolean;
- * movingHorizontal: boolean,
- * movingVertical: boolean,
- * }} Player
- */
+/**
+* @typedef {{
+* pos: Vector,
+* firingCooldown: number,
+* currentBullets: number,
+* beamFired: boolean;
+* movingHorizontal: boolean,
+* movingVertical: boolean,
+* }} Player
+*/
   
-  /**
-   * @type { Player }
-   */
-  let player;
+/**
+* @type { Player }
+*/
+let player;
   
 
 
@@ -136,7 +136,7 @@ function update() {
     for (let i = 0; i < 5; i++){
       const posX = rnd(0, G.WIDTH);
       const posY = -rnd(i * G.HEIGHT * 0.1);
-      enemies.push({pos: vec(posX, posY)})
+      enemies.push({pos: vec(posX, posY), firingCooldown: 10, drift: 5})
       
     }
 
@@ -156,25 +156,8 @@ function update() {
   });
 
   // Updating and drawing the player
-
-  if (player.pos.x - G.PLAYER_MOVE_SPEED > input.pos.x) {
-    // left of cursor
-    player.pos.x = player.pos.x - G.PLAYER_MOVE_SPEED;
-    player.movingHorizontal = true;
-  } else if (player.pos.x + G.PLAYER_MOVE_SPEED < input.pos.x) {
-    // right of cursor
-    player.pos.x = player.pos.x + G.PLAYER_MOVE_SPEED;
-    player.movingHorizontal = true;
-  }
-
-  if (player.pos.y - G.PLAYER_MOVE_SPEED > input.pos.y) {
-    // above cursor
-    player.pos.y = player.pos.y - G.PLAYER_MOVE_SPEED;
-    player.movingHorizontal = true;
-  } else if (player.pos.y + G.PLAYER_MOVE_SPEED < input.pos.y) {
-    // below of cursor
-    player.pos.y = player.pos.y + G.PLAYER_MOVE_SPEED;
-  }
+  player.pos.x += -G.PLAYER_MOVE_SPEED * (player.pos.x - input.pos.x);
+  player.pos.y += -G.PLAYER_MOVE_SPEED * (player.pos.y - input.pos.y);
   // restricting movement to screen
 	player.pos.clamp(0, G.WIDTH, 0, G.HEIGHT);
   // drawing character
