@@ -165,7 +165,7 @@ function update() {
     player = {
 			pos: vec(G.WIDTH * 0.5, G.HEIGHT * 0.5),
 			firingCooldown: G.PLAYER_FIRE_RATE,
-			currentBullets: 10,
+			currentBullets: 20,
       beamFired: false,
 		};
     mBullets = [];
@@ -220,10 +220,11 @@ function update() {
   player.firingCooldown--;
 
   // firing bullets
-  if(player.firingCooldown <= 0 && !player.beamFired){
+  if(player.firingCooldown <= 0 && !player.beamFired && player.currentBullets != 0){
     fBullets.push({
       pos: vec(player.pos.x, player.pos.y)
     });
+    player.currentBullets--;
     player.firingCooldown = G.PLAYER_FIRE_RATE;
     color("black");
     particle(
@@ -291,6 +292,7 @@ function update() {
       color("yellow");
       particle(e.pos);
       play("explosion");
+      addScore(10, e.pos);
     }
     if (isCollidingWithPlayer && !player.beamFired) {
       play("powerUp");
@@ -342,6 +344,7 @@ function update() {
   // udpating UI
   color("red");
 	text(player.currentBullets.toString(), 3, 10);
+  
 
 
 
