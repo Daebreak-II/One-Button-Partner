@@ -44,13 +44,13 @@ const G = {
   ENEMY_MAX_BASE_SPEED: 2.0,
   ENEMY_FIRE_RATE: 45,
   
-  EBULLET_SPEED: 1.0,
+  EBULLET_SPEED: 3.0,
 };
 
 options = {
   viewSize: {x: G.WIDTH, y: G.HEIGHT},
   seed: 1,
-  isPlayingBgm: true,
+  //isPlayingBgm: true,
   theme: "shapeDark"
 }
 
@@ -99,7 +99,28 @@ let currentEnemySpeed;
 * @type { Player }
 */
 let player;
-  
+
+/**
+ * @typedef {{
+ * pos: Vector
+ * }} FBullet
+ */
+
+/**
+ * @typedef {{
+ * pos: Vector
+ * }} EBullet
+ */
+
+/**
+ * @type { EBullet []}
+ */
+let eBullets;
+
+/**
+ * @type { FBullet []}
+ */
+let fBullets;
 
 
 function update() {
@@ -127,6 +148,8 @@ function update() {
       movingVertical: false
 		};
     enemies = [];
+    fBullets = [];
+    eBullets = [];
     currentEnemySpeed = 0;
 
   }
@@ -155,14 +178,39 @@ function update() {
     box(s.pos, 1);
   });
 
+  fBullets.forEach((fb) => {
+    fb.pos.y -= G.FBULLET_SPEED;
+    color("black");
+    box(fb.pos, 2);
+  });
+
   // Updating and drawing the player
   player.pos.x += -G.PLAYER_MOVE_SPEED * (player.pos.x - input.pos.x);
   player.pos.y += -G.PLAYER_MOVE_SPEED * (player.pos.y - input.pos.y);
   // restricting movement to screen
 	player.pos.clamp(0, G.WIDTH, 0, G.HEIGHT);
+  player.firingCooldown--;
+
+  if(player.firingCooldown <= 0){
+    fBullets.push({
+      pos: vec(player.pos.x, player.pos.y)
+    });
+    player.firingCooldown = G.PLAYER_FIRE_RATE;
+    color("black");
+    particle(
+      player.pos.x,
+      player.pos.y,
+      4,
+      1,
+      -PI/2,
+      PI/4
+    );
+  }
+
   // drawing character
   color("black");
 	char("a", player.pos);
+
   // adding engine particle effect
   color("yellow");
   particle(
@@ -181,11 +229,40 @@ function update() {
 		PI/2, // The emitting angle
 		PI/4  // The emitting width
 	);
+
   remove(enemies, (e) => {
     e.pos.y += currentEnemySpeed;
+    e.firingCooldown--;
+    if(e.firingCooldown <= 0){
+      eBullets.push({
+        pos: vec(e.pos.x, e.pos.y)
+      });
+      e.firingCooldown = G.ENEMY_FIRE_RATE;
+    }
     color("black");
-    char("b", e.pos);
-    return (e.pos.y > G.HEIGHT);
+    const isCollidingwithFBullets = char("b", e.pos).isColliding.rect.black
+    if(isCollidingwithFBullets){
+      color("yellow");
+      particle(e.pos);
+    }
+    //char("b", e.pos);
+    return (isCollidingwithFBullets || e.pos.y > G.HEIGHT);
+  });
+
+  remove(fBullets, (fb) => {
+    const isCollidingWithEnemies = box(fb.pos, 2).isColliding.char.b;
+    return (isCollidingWithEnemies || fb.pos.y < 0);
+  });
+
+  remove(eBullets, (eb) => {
+    eb.pos.y += G.EBULLET_SPEED;
+    color("black");
+    const isCollidingWithPlayer
+      = char("c", eb.pos).isColliding.char.a;
+    if(isCollidingWithPlayer){
+      end();
+    }
+    return(!eb.pos.isInRect(0, 0, G.WIDTH, G.HEIGHT));
   });
   
 
