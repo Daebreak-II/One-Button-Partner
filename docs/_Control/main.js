@@ -15,7 +15,7 @@ cc  cc
 rr  rr
 rrrrrr
 rrggrr
-rrrrrr
+rrggrr
   rr
   rr
 `,`
@@ -43,7 +43,7 @@ const G = {
   
   PLAYER_FIRE_RATE: 10,
   PLAYER_GUN_OFFSET: 3,
-  PLAYER_MAG_SIZE: 10,
+  PLAYER_MAG_SIZE: 20,
   PLAYER_MOVE_SPEED: 0.1,
   
   MBULLET_SPEED: 1,
@@ -165,7 +165,7 @@ function update() {
     player = {
 			pos: vec(G.WIDTH * 0.5, G.HEIGHT * 0.5),
 			firingCooldown: G.PLAYER_FIRE_RATE,
-			currentBullets: 20,
+			currentBullets: G.PLAYER_MAG_SIZE,
       beamFired: false,
 		};
     mBullets = [];
@@ -273,39 +273,7 @@ function update() {
     );
   }
 
-  // updating enemies
-  remove(enemies, (e) => {
-    e.pos.y += currentEnemySpeed;
-    e.pos.x += e.drift;
-    e.firingCooldown--;
-    if(e.firingCooldown <= 0){
-      eBullets.push({
-        pos: vec(e.pos.x, e.pos.y)
-      });
-      e.firingCooldown = rnd(G.ENEMY_MAX_FIRE_RATE/2, G.ENEMY_MAX_FIRE_RATE);
-    }
-    color("black");
-    const isCollidingwithFBullets = char("b", e.pos).isColliding.rect.black
-    const isCollidingwithMBullets = char("b", e.pos).isColliding.char.d
-    const isCollidingWithPlayer = char("b", e.pos).isColliding.char.a
-    if(isCollidingwithFBullets){
-      color("yellow");
-      particle(e.pos);
-      play("explosion");
-      addScore(10, e.pos);
-    }
-    if (isCollidingWithPlayer && !player.beamFired) {
-      play("powerUp");
-      end();
-    }
-    //char("b", e.pos);
-    return (/*isCollidingwithFBullets || */e.pos.y > G.HEIGHT || isCollidingwithMBullets);
-  });
 
-  remove(fBullets, (fb) => {
-    const isCollidingWithEnemies = box(fb.pos, 2).isColliding.char.b;
-    return (isCollidingWithEnemies || fb.pos.y < 0);
-  });
 
   remove(eBullets, (eb) => {
     eb.pos.y += G.EBULLET_SPEED;
@@ -316,7 +284,7 @@ function update() {
       color("red");
       particle(eb.pos);
       play("powerUp");
-      // end();
+      end();
     }
     return(!eb.pos.isInRect(0, 0, G.WIDTH, G.HEIGHT));
   });
@@ -332,20 +300,60 @@ function update() {
       m.travelDistance--;
     }
     color("purple");
-    const isCollidingWithEnemies = char("d", m.pos).isColliding.char.b;
+    char("d", m.pos);
 
-    if (m.travelDistance <= 0 || isCollidingWithEnemies) {
+    if (m.travelDistance <= 0) {
       player.beamFired = false;
       player.pos = m.pos;
     }
-    return(m.travelDistance <= 0 || isCollidingWithEnemies);
+
+    return(m.travelDistance <= 0);
   });
 
   // udpating UI
   color("red");
 	text(player.currentBullets.toString(), 3, 10);
   
+  // updating enemies
+  remove(enemies, (e) => {
+    e.pos.y += currentEnemySpeed;
+    e.pos.x += e.drift;
+    e.firingCooldown--;
+    if(e.firingCooldown <= 0){
+      eBullets.push({
+        pos: vec(e.pos.x, e.pos.y)
+      });
+      e.firingCooldown = rnd(G.ENEMY_MAX_FIRE_RATE/2, G.ENEMY_MAX_FIRE_RATE);
+    }
+    color("black");
+    const isCollidingwithMBullets = char("b", e.pos).isColliding.char.d
+    const isCollidingwithFBullets = char("b", e.pos).isColliding.rect.black
+    const isCollidingWithPlayer = char("b", e.pos).isColliding.char.a
+    if(isCollidingwithFBullets){
+      color("yellow");
+      particle(e.pos);
+      play("explosion");
+      addScore(10, e.pos);
+    }
+    if (isCollidingWithPlayer && !player.beamFired) {
+      play("powerUp");
+      end();
+    }
+    if (isCollidingwithMBullets) {
+      var location = player.pos
+      player.pos = e.pos;
+      e.pos = location;
+      player.beamFired = false;
+      player.currentBullets = G.PLAYER_MAG_SIZE;
+      mBullets.pop();
+      addScore(50, player.pos);
+    }
+    return (isCollidingwithFBullets || e.pos.y > G.HEIGHT);
+  });
 
-
+  remove(fBullets, (fb) => {
+    const isCollidingWithEnemies = box(fb.pos, 2).isColliding.char.b;
+    return (isCollidingWithEnemies || fb.pos.y < 0);
+  });
 
 }
