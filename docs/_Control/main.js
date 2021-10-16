@@ -12,12 +12,12 @@ ccllcc
 ccllcc 
 cc  cc
 `,`
-rr  rr
-rrrrrr
-rrggrr
-rrggrr
-  rr
-  rr
+cc  cc
+ccllcc
+ccllcc
+ccllcc 
+  ll
+  ll
 `,`
  yyy
  yyy
@@ -62,7 +62,7 @@ const G = {
 options = {
   viewSize: {x: G.WIDTH, y: G.HEIGHT},
   seed: 1,
-  // isPlayingBgm: true,
+  isPlayingBgm: true,
   theme: "shapeDark"
 }
 
@@ -283,7 +283,7 @@ function update() {
     if(isCollidingWithPlayer && !player.beamFired){
       color("red");
       particle(eb.pos);
-      play("powerUp");
+      play("explosion");
       end();
     }
     return(!eb.pos.isInRect(0, 0, G.WIDTH, G.HEIGHT));
@@ -332,11 +332,11 @@ function update() {
     if(isCollidingwithFBullets){
       color("yellow");
       particle(e.pos);
-      play("explosion");
+      play("hit");
       addScore(10, e.pos);
     }
     if (isCollidingWithPlayer && !player.beamFired) {
-      play("powerUp");
+      play("explosion");
       end();
     }
     if (isCollidingwithMBullets) {
@@ -346,6 +346,7 @@ function update() {
       player.beamFired = false;
       player.currentBullets = G.PLAYER_MAG_SIZE;
       mBullets.pop();
+      play("powerUp");
       addScore(50, player.pos);
     }
     return (isCollidingwithFBullets || e.pos.y > G.HEIGHT);
